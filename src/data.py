@@ -1,6 +1,7 @@
 import os
 import pdfplumber
 import pandas as pd
+import logging
 
 def extract_table_from_pdf(pdf_path):
     """
@@ -12,41 +13,49 @@ def extract_table_from_pdf(pdf_path):
     Returns:
         str: The path to the saved CSV file.
     """
-    # Extract the base name of the file (without extension)
-    base_name = os.path.splitext(os.path.basename(pdf_path))[0]
+    try:
+        # Extract the base name of the file (without extension)
+        base_name = os.path.splitext(os.path.basename(pdf_path))[0]
 
-    # Get the directory path of the PDF file
-    directory = os.path.dirname(pdf_path)
+        # Get the directory path of the PDF file
+        directory = os.path.dirname(pdf_path)
 
-    # Create the full CSV file path
-    csv_file_path = os.path.join(directory, f"{base_name}.csv")
+        # Create the full CSV file path
+        csv_file_path = os.path.join(directory, f"{base_name}.csv")
 
-    # Open the PDF file
-    with pdfplumber.open(pdf_path) as pdf:
-        all_tables = []
-        # Iterate through the pages
-        for page in pdf.pages:
-            # Extract tables from the page
-            tables = page.extract_tables()
-            for table in tables:
-                all_tables.append(table)
+        # Open the PDF file
+        with pdfplumber.open(pdf_path) as pdf:
+            all_tables = []
+            # Iterate through the pages
+            for page in pdf.pages:
+                # Extract tables from the page
+                tables = page.extract_tables()
+                if tables:
+                    all_tables.extend(tables)
 
-    # Combine all tables into a single DataFrame
-    df_list = []
-    for table in all_tables:
-        df = pd.DataFrame(table[1:], columns=table[0])
-        df_list.append(df)
+        if not all_tables:
+            logging.warning(f"No tables found in the PDF file: {pdf_path}")
+            return ""
 
-    # Concatenate all DataFrames
-    final_df = pd.concat(df_list, ignore_index=True)
+        # Combine all tables into a single DataFrame
+        df_list = [pd.DataFrame(table[1:], columns=table[0]) for table in all_tables if table]
 
-    # Save the final DataFrame to a CSV file
-    final_df.to_csv(csv_file_path, index=False)
+        # Concatenate all DataFrames
+        final_df = pd.concat(df_list, ignore_index=True)
 
-    print(f"Tables extracted and saved to '{csv_file_path}'.")
+        # Save the final DataFrame to a CSV file
+        final_df.to_csv(csv_file_path, index=False)
 
-    return csv_file_path
+        logging.info(f"Tables extracted and saved to '{csv_file_path}'.")
+
+        return csv_file_path
+
+    except Exception as e:
+        logging.error(f"An error occurred: {e}")
+        return ""
 
 # Example usage:
-pdf_path = "./data/transactions_july_2024.pdf"
-extract_table_from_pdf(pdf_path)
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    pdf_path = "./data/transactions_july_2024.pdf"
+    extract_table_from_pdf(pdf_path)

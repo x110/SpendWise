@@ -32,14 +32,13 @@ async def on_message(message):
                 pdf_path = f'/tmp/{attachment.filename}'
                 await attachment.save(pdf_path)
 
-                # Extract text from the PDF
-                df = extract_table_from_pdf(pdf_path)
+                # Extract Tables from the PDF
+                csv_path = extract_table_from_pdf(pdf_path)
                 
-                # Send the extracted text back to the channel
-                if not df.empty:
-                    await message.channel.send(f'Content of the PDF:\n{df}')
+                if csv_path:
+                    await message.channel.send('Successfully extracted the content of the PDF.')
                 else:
-                    await message.channel.send('Failed to extract content from the PDF.')
+                    await message.channel.send('Failed to extract tables from the PDF.')
 
 # Run the bot
 client.run(TOKEN)
