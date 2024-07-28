@@ -13,3 +13,32 @@ SpendWise is an AI-powered chatbot designed to categorize individual spending fr
 A user asks SpendWise, "How much did I spend on groceries last month?" The chatbot, utilizing Falcon model, categorizes all relevant transactions, calculates the total spending on groceries, and provides a detailed response. The user can also request a summary report for the entire month, highlighting key spending areas and trends. Queries can be as simple as "Show me my entertainment expenses" or "What was my biggest purchase last month?"
 
 
+## Milestone: SpendWise Bot Initial Prototype
+
+1. **Integration with Discord Bot**
+   - [x] Develop chatbot interface on Discord.
+
+2. **Upload Monthly Bank Statement File to Server through Bot Interface**
+    - [x] Implement file upload feature.
+
+3. **Extract Tables from PDF**
+   - Use PDF parsing libraries for accurate data extraction.
+
+4. **Data Cleanup and Standardization**
+   - Normalize and clean extracted data.
+
+5. **Extract Merchant Name**
+   - Identify and extract merchant names from transactions.
+
+6. **Use AI71 APIs to Classify Transactions**
+   - Categorize transactions using AI71 APIs 
+   - Implement fallback for unrecognized transactions.
+
+7. **Bot Reply with Summary Report**
+   - Generate and format summary report of categorized transactions.
+
+8. ** Converting natural language to sql queries**
+
+9. **Test and Collect Feedback from Mentors**
+   - Conduct testing 
+   - Gather and implement feedback from mentors.
