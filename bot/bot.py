@@ -1,7 +1,11 @@
 import discord
-import fitz  # PyMuPDF
 import os
+import pdfplumber
+import pandas as pd
 from dotenv import load_dotenv
+from data import extract_table_from_pdf
+
+
 load_dotenv()
 
 # Replace 'YOUR_BOT_TOKEN' with your actual bot token
@@ -29,25 +33,13 @@ async def on_message(message):
                 await attachment.save(pdf_path)
 
                 # Extract text from the PDF
-                text = extract_text_from_pdf(pdf_path)
+                df = extract_table_from_pdf(pdf_path)
                 
                 # Send the extracted text back to the channel
-                if text:
-                    await message.channel.send(f'Content of the PDF:\n{text}')
+                if not df.empty:
+                    await message.channel.send(f'Content of the PDF:\n{df}')
                 else:
                     await message.channel.send('Failed to extract content from the PDF.')
-
-def extract_text_from_pdf(pdf_path):
-    try:
-        document = fitz.open(pdf_path)
-        text = ""
-        for page_num in range(len(document)):
-            page = document.load_page(page_num)
-            text += page.get_text()
-        return text
-    except Exception as e:
-        print(f'Error extracting text from PDF: {e}')
-        return None
 
 # Run the bot
 client.run(TOKEN)
