@@ -37,8 +37,21 @@ A user asks SpendWise, "How much did I spend on groceries last month?" The chatb
 7. **Bot Reply with Summary Report**
    - Generate and format summary report of categorized transactions.
 
-8. ** Converting natural language to sql queries**
+8. **Converting natural language to sql queries**
 
 9. **Test and Collect Feedback from Mentors**
    - Conduct testing 
    - Gather and implement feedback from mentors.
+
+## Milestone: SpendWise Bot 2nd Prototype
+
+1. **Dataset Preparation and Testing**
+   - Collect and generate datasets to evaluate the SpendWise functionality and performance.
+
+2. **Testing Framework Development**
+   - Develop testing scripts to automate the evaluation process.
+   - Implement mechanisms to log and analyze test results.
+
+3. **Backend and Frontend Integration**
+   - Identify all API endpoints necessary for interaction between the frontend and the backend.
+   - Define the data formats and structures for each API endpoint, detailing request and response specifications.
