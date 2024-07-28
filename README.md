@@ -28,7 +28,7 @@ A user asks SpendWise, "How much did I spend on groceries last month?" The chatb
    - [x] Normalize and clean extracted data.
 
 5. **Extract Merchant Name**
-   - Identify and extract merchant names from transactions.
+   -[x] Identify and extract merchant names from transactions.
 
 6. **Use AI71 APIs to Classify Transactions**
    - Categorize transactions using AI71 APIs 
