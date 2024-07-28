@@ -3,7 +3,8 @@ import os
 import pdfplumber
 import pandas as pd
 from dotenv import load_dotenv
-from data import extract_table_from_pdf
+import json
+from data import extract_table_from_pdf, process_transactions, classify_company
 
 
 load_dotenv()
@@ -34,11 +35,18 @@ async def on_message(message):
 
                 # Extract Tables from the PDF
                 csv_path = extract_table_from_pdf(pdf_path)
+                df = process_transactions(csv_path)
+                
+
+
+
                 
                 if csv_path:
                     await message.channel.send('Successfully extracted the content of the PDF.')
                 else:
                     await message.channel.send('Failed to extract tables from the PDF.')
+
+                await message.channel.send(df.head().to_json(orient='records'))
 
 # Run the bot
 client.run(TOKEN)

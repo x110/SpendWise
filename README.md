@@ -22,10 +22,10 @@ A user asks SpendWise, "How much did I spend on groceries last month?" The chatb
     - [x] Implement file upload feature.
 
 3. **Extract Tables from PDF**
-   - Use PDF parsing libraries for accurate data extraction.
+   - [x] Use PDF parsing libraries for accurate data extraction.
 
 4. **Data Cleanup and Standardization**
-   - Normalize and clean extracted data.
+   - [x] Normalize and clean extracted data.
 
 5. **Extract Merchant Name**
    - Identify and extract merchant names from transactions.
