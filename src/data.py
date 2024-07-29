@@ -4,6 +4,7 @@ import pandas as pd
 import logging
 import json
 import requests
+import re
 
 def extract_table_from_pdf(pdf_path):
     """
@@ -62,13 +63,12 @@ def extract_table_from_pdf(pdf_path):
 #    pdf_path = "./data/transactions_july_2024.pdf"
 #    extract_table_from_pdf(pdf_path)
 
-import pandas as pd
-import re
 
 # Function to process the DataFrame and parse transactions
 def process_transactions(data_path):
     # Load the data
     df = pd.read_csv(data_path)
+    df = df.rename(columns={'Date':'Date0'})
     
     # Drop rows where all elements are NaN
     df = df.dropna(how='all')
@@ -116,7 +116,7 @@ def process_transactions(data_path):
                 "Location": city,
                 "Country Code": card_match.group(3).strip(),
                 "Transaction ID": card_match.group(4),
-                "Date1": card_match.group(5),
+                "Date": card_match.group(5),
                 "Amount": card_match.group(6),
                 "Currency": card_match.group(7)
             }
@@ -129,7 +129,7 @@ def process_transactions(data_path):
                 "Location": None,
                 "Country Code": None,
                 "Transaction ID": None,
-                'Date1': None,
+                'Date': None,
                 'Amount': None,
                 'Currency': None,
                 'Reference': reference,
@@ -142,7 +142,7 @@ def process_transactions(data_path):
                 "Location": None,
                 "Country Code": None,
                 "Transaction ID": None,
-                'Date1': None,
+                'Date': None,
                 'Amount': None,
                 'Currency': None,
                 'Reference': None,
@@ -160,6 +160,32 @@ def process_transactions(data_path):
 # Example usage:
 # df_final = process_transactions('path_to_your_file.csv')
 # print(df_final)
+
+import time
+
+def fetch_with_retry(url: str, headers: dict, payload: dict, max_retries: int = 20):
+    for attempt in range(max_retries):
+        try:
+            response = requests.post(url, headers=headers, data=payload)
+            
+            if response.status_code == 429:  # Rate limit exceeded
+                retry_after = response.headers.get("Retry-After")
+                if retry_after is None:
+                    retry_after = response.json().get("retry_after", 1)  # Fallback to 1 second if not provided
+                retry_after = int(retry_after)
+                
+                print(f"Rate limit exceeded. Retrying after {retry_after} seconds...")
+                time.sleep(retry_after)
+            else:
+                # Successful response or other status code
+                response.raise_for_status()  # Will raise an HTTPError for bad responses (4xx and 5xx)
+                return response.json()
+        
+        except requests.RequestException as e:
+            print(f"Request failed: {e}")
+            time.sleep(1)  # Short sleep before retrying in case of connection errors or timeouts
+
+    raise Exception("Max retries exceeded")
 
 def classify_company(user_content):
     url = "https://api.ai71.ai/v1/chat/completions"
@@ -183,8 +209,9 @@ def classify_company(user_content):
     categories_str = ', '.join(categories)
 
     role_content = (
-        f"You will be provided with a company name, and your task is to classify it to one of the following "
+        f"You will be provided with company names, and your task is to classify them to one of the following "
         f"{categories_str}"
+        f" return them formated as json where field is company name and value is category"
     )
     
     payload = json.dumps({
@@ -206,7 +233,8 @@ def classify_company(user_content):
         'Authorization': f'Bearer {AI71_TOKEN}'
     }
     
-    response = requests.post(url, headers=headers, data=payload)
+    #response = requests.post(url, headers=headers, data=payload)
+    response = fetch_with_retry(url, headers, payload)
 
     try:
         response_json = response.json()

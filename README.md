@@ -1,8 +1,8 @@
 ---
-title: discord-Bot
-emoji: 🌖
-colorFrom: red
-colorTo: green
+title: Discord Bot
+emoji: 👁
+colorFrom: pink
+colorTo: purple
 sdk: docker
 pinned: false
 ---
@@ -63,4 +63,5 @@ A user asks SpendWise, "How much did I spend on groceries last month?" The chatb
 3. **Backend and Frontend Integration**
    - Identify all API endpoints necessary for interaction between the frontend and the backend.
    - Define the data formats and structures for each API endpoint, detailing request and response specifications.
+
 

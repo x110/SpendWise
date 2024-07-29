@@ -7,7 +7,7 @@ python bot.py &
 BOT_PID=$!
 
 # Start the Uvicorn server
-uvicorn app:app --host 0.0.0.0 --port 7860
+uvicorn app:app --host 0.0.0.0 --port 7860 --timeout-keep-alive 600
 
 # Optionally wait for the bot process to finish
 wait $BOT_PID
