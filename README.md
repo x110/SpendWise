@@ -1,3 +1,11 @@
+---
+title: discord-Bot
+emoji: 🌖
+colorFrom: red
+colorTo: green
+sdk: docker
+pinned: false
+---
 # SpendWise - AI-Powered Spending Insights Chatbot
 ## Project Overview
 SpendWise is an AI-powered chatbot designed to categorize individual spending from bank statements and provide insightful analytics. Users can interact with SpendWise in natural language to get detailed answers about their monthly expenditures and generate summary reports. Utilizing Falcon language models though AI71 apis, SpendWise automates transaction categorization and offers personalized financial insights.
@@ -56,11 +64,3 @@ A user asks SpendWise, "How much did I spend on groceries last month?" The chatb
    - Identify all API endpoints necessary for interaction between the frontend and the backend.
    - Define the data formats and structures for each API endpoint, detailing request and response specifications.
 
----
-title: discord-Bot
-emoji: 🌖
-colorFrom: red
-colorTo: green
-sdk: docker
-pinned: false
----
