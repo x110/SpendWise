@@ -1,0 +1,7 @@
+fastapi
+uvicorn[standard]
+discord.py
+pdfplumber
+pandas
+requests
+tabulate
