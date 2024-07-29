@@ -1,0 +1,11 @@
+langchain_openai 
+langchain_core
+python-dotenv
+streamlit
+langchain_community
+ipykernel
+pypdf
+faiss-cpu
+langchain_text_splitters
+openai
+#chromadb
