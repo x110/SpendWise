@@ -163,7 +163,7 @@ def process_transactions(data_path):
 
 import time
 
-def fetch_with_retry(url: str, headers: dict, payload: dict, max_retries: int = 20):
+def fetch_with_retry(url: str, headers: dict, payload: dict, max_retries: int = 5):
     for attempt in range(max_retries):
         try:
             response = requests.post(url, headers=headers, data=payload)
