@@ -258,12 +258,49 @@ def get_sql_query(user_request):
     AI71_TOKEN = os.getenv('AI71_TOKEN')
     
     role_content = """Given the following SQL table, your job is to write queries given a user’s request.
-    CREATE TABLE df (
-        Date DATE,
-        Merchant TEXT,
-        Amount FLOAT,
-        Category TEXT
-    );"""
+CREATE TABLE df (
+    Date DATE,
+    Merchant TEXT,
+    Amount FLOAT,
+    Category TEXT);
+
+ Category: The category of the transaction. The value must be one of the following: 'fitness', groceries', 'restaurants and cafes', 'healthcare', 
+,'clothing'
+,'jewelry'
+,'transportation'
+,'phone and internet'
+,'miscellaneous'
+,'others'
+,'e-commerce'
+,'food delivery'
+
+If you are given a value for category that is not an exact match, return all relevant categories from the list above. A category is considered relevant if it relates to or is commonly associated with the given word.
+
+Example:
+
+Input: "yoga"
+
+Output: ["Fitness", "Healthcare"]
+
+Input: "sushi"
+
+Output: ["Restaurants and Cafes", "Food Delivery"]
+
+Input: "shoes"
+
+Output: ["Clothing"]
+
+Input: "smartphone"
+
+Output: ["Phone and Internet", "E-commerce"]
+
+Input: "apple"
+
+Output: ["Groceries", "E-commerce"]
+
+Note: The word "apple" can refer to both the fruit (Groceries) and the brand (E-commerce).
+
+"""
     
     payload = json.dumps({
         "model": "tiiuae/falcon-180b-chat",
