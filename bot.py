@@ -5,6 +5,7 @@ import pandas as pd
 import json
 from src.data import extract_table_from_pdf, process_transactions, classify_company, execute_query_and_display
 from dotenv import load_dotenv
+import random
 load_dotenv()
 
 # Replace 'YOUR_BOT_TOKEN' with your actual bot token
@@ -126,11 +127,23 @@ async def on_message(message):
                 
                 await message.channel.send(f'```\n{markdown_content}\n```')
     if message.content.startswith('/ask'):
+        messages = [
+            "Hang tight, we're working on it!",
+            "Hold up, we’re fetching the info you need!",
+            "Give us a moment, we’re on it!",
+            "One moment please, we’re getting that sorted!",
+            "We’re on the case, check back in a bit!",
+            "Be patient, magic is happening behind the scenes!",
+            "Sit tight, we’re working our magic!",
+            "We’re processing your request – please bear with us!"
+            ]
+        response_message = random.choice(messages)
+        await message.channel.send(response_message)
         if os.path.exists(df_file_path):
             try:
                 df = pd.read_csv(df_file_path)
                 markdown_content = execute_query_and_display(message.content, df)
-                await message.channel.send(f'```\n{markdown_content}\n```')
+                await message.channel.send(markdown_content)
             except Exception as e:
                 await message.channel.send(f'Error processing the file: {e}')
         else:

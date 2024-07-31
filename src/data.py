@@ -334,6 +334,23 @@ Note: The word "apple" can refer to both the fruit (Groceries) and the brand (E-
             return "No choices found in the response."
     except ValueError:
         return "Response is not in JSON format: " + response.text
+import pandas as pd
+
+def format_table_as_text(df):
+    # Determine column widths
+    col_widths = [max(len(str(val)) for val in df[col]) for col in df.columns]
+    
+    # Create the header row
+    header = " | ".join(f"{col:<{width}}" for col, width in zip(df.columns, col_widths))
+    
+    # Create the separator row
+    separator = "-+-".join("-" * width for width in col_widths)
+    
+    # Create the data rows
+    rows = "\n".join(" | ".join(f"{str(val):<{width}}" for val, width in zip(row, col_widths)) for row in df.values)
+    
+    return f"{header}\n{separator}\n{rows}"
+
 
 def execute_query_and_display(user_request, df):
     # Get the SQL query from the AI71 API
@@ -343,8 +360,8 @@ def execute_query_and_display(user_request, df):
     if "SELECT" in sql_query:  # simple check if the response seems like a SQL query
         try:
             result = sqldf(sql_query.lower(), locals())
-            result_markdown = result.to_markdown()
-            markdown_content = f"### SQL Query\n```\n{sql_query}\n```\n\n### Result\n{result_markdown}"
+            result_text = format_table_as_text(df)
+            markdown_content = f"### Here’s what we found:\n```\n{result_text}\n```\n### We ran the following SQL query:\n```sql\n{sql_query}\n```\n\n"
             return markdown_content
         except Exception as e:
             print(f"Error executing query: {e}")
