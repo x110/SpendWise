@@ -360,7 +360,7 @@ def execute_query_and_display(user_request, df):
     if "SELECT" in sql_query:  # simple check if the response seems like a SQL query
         try:
             result = sqldf(sql_query.lower(), locals())
-            result_text = format_table_as_text(df)
+            result_text = format_table_as_text(result)
             markdown_content = f"### Here’s what we found:\n```\n{result_text}\n```\n### We ran the following SQL query:\n```sql\n{sql_query}\n```\n\n"
             return markdown_content
         except Exception as e:
