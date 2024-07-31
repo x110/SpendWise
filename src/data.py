@@ -237,8 +237,7 @@ def classify_company(user_content):
     response = fetch_with_retry(url, headers, payload)
 
     try:
-        response_json = response.json()
-        choices = response_json.get('choices', [])
+        choices = response.get('choices', [])
         if choices:
             result = choices[0].get('message', {}).get('content', '').strip()
             return result
@@ -247,3 +246,71 @@ def classify_company(user_content):
             
     except ValueError:
         return None
+
+import os
+import json
+import requests
+import pandas as pd
+from pandasql import sqldf
+
+def get_sql_query(user_request):
+    url = "https://api.ai71.ai/v1/chat/completions"
+    AI71_TOKEN = os.getenv('AI71_TOKEN')
+    
+    role_content = """Given the following SQL table, your job is to write queries given a user’s request.
+    CREATE TABLE df (
+        Date DATE,
+        Merchant TEXT,
+        Amount FLOAT,
+        Category TEXT
+    );"""
+    
+    payload = json.dumps({
+        "model": "tiiuae/falcon-180b-chat",
+        "messages": [
+            {
+                "role": "system",
+                "content": role_content
+            },
+            {
+                "role": "user",
+                "content": user_request
+            }
+        ]
+    })
+    
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {AI71_TOKEN}'
+    }
+    
+    response = requests.request("POST", url, headers=headers, data=payload)
+    
+    try:
+        response_json = response.json()
+        choices = response_json.get('choices', [])
+        if choices:
+            message_content = choices[0].get('message', {}).get('content', '')
+            query = message_content.strip()
+            return query
+        else:
+            return "No choices found in the response."
+    except ValueError:
+        return "Response is not in JSON format: " + response.text
+
+def execute_query_and_display(user_request, df):
+    # Get the SQL query from the AI71 API
+    user_request = 'Write a SQL query which answers' + user_request
+    sql_query = get_sql_query(user_request)
+    
+    if "SELECT" in sql_query:  # simple check if the response seems like a SQL query
+        try:
+            result = sqldf(sql_query.lower(), locals())
+            result_markdown = result.to_markdown()
+            markdown_content = f"### SQL Query\n```\n{sql_query}\n```\n\n### Result\n{result_markdown}"
+            return markdown_content
+        except Exception as e:
+            print(f"Error executing query: {e}")
+    else:
+        print(sql_query)
+
