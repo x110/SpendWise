@@ -3,7 +3,8 @@ import os
 import pdfplumber
 import pandas as pd
 import json
-from src.data import extract_table_from_pdf, process_transactions, classify_company, execute_query_and_display
+from src.data import extract_table_from_pdf, parse_transactions, classify_company, execute_query_and_display, format_table_as_text
+from src.report import generate_bank_statement_report
 from dotenv import load_dotenv
 import random
 load_dotenv()
@@ -24,48 +25,32 @@ async def on_ready():
 @client.event
 async def on_message(message):
     df_file_path = 'filtered_data.csv'
-    # Check if the message contains an attachment
+
     if message.attachments:
         for attachment in message.attachments:
             if attachment.filename.endswith('.pdf'):
-                await message.channel.send('PDF received! Extracting content...')
-
-                # Download the PDF file
+                await message.channel.send('"PDF received! Extracting content now...')
                 pdf_path = f'/tmp/{attachment.filename}'
                 await attachment.save(pdf_path)
 
-                # Extract Tables from the PDF
                 csv_path = extract_table_from_pdf(pdf_path)
                 if csv_path:
                     await message.channel.send('Successfully extracted the content of the PDF.')
                 else:
                     await message.channel.send('Failed to extract tables from the PDF.')
-                df = process_transactions(csv_path)
-                df['Date'] = pd.to_datetime(df['Date'])#, errors='coerce')
+                
+                df = pd.read_csv(csv_path)
+                table_str = df[['Description']].head().to_markdown(index=False) #TODO check if column name exists
+                await message.channel.send('\nHere is a sample of the transactions:\n')
+                await message.channel.send(f'```\n{table_str}\n```')
 
-                # Convert other potentially numeric columns that were inferred as 'object'
-                #df['Debits'] = pd.to_numeric(df['Debits'])#, errors='coerce')
-                #df['Credits'] = pd.to_numeric(df['Credits'])#, errors='coerce')
-                #df['Balance'] = pd.to_numeric(df['Balance'])#, errors='coerce')
-                df['Amount'] = pd.to_numeric(df['Amount'])#, errors='coerce')
-
-                # Handle missing values if necessary
-                df.fillna({
-                    'Debits': 0,
-                    'Credits': 0,
-                    'Balance': 0,
-                    'Amount': 0
-                }, inplace=True)
-
-                #df = df.dropna(how='all')
-                #df = df.dropna(subset=['Merchant'])
-                table_str = df[['Description']].head().to_markdown(index=False)  # Use markdown for better formatting
+                await message.channel.send('Identifying key details from transactions...\n')
+                df = parse_transactions(df)
+                table_str = df.head().to_markdown(index=False)
                 await message.channel.send(f'```\n{table_str}\n```')
                 
-                cols = ['Merchant','Location','Date', 'Amount']
-                table_str = df.filter(cols).head().to_markdown(index=False)  # Use markdown for better formatting
-                await message.channel.send(f'```\n{table_str}\n```')
-                
+                await message.channel.send('Hang tight! We are categorizing your transaction into the right spending category. This will just take a moment.\n')
+                cols = df.columns.to_list()
                 merchants = df.Merchant.drop_duplicates()
                 merchants_str = ', '.join(merchants)
                 results = classify_company(merchants_str)
@@ -92,14 +77,9 @@ async def on_message(message):
                 cols += ['Category']
                 table_str = df.filter(cols).head().to_markdown(index=False)  # Use markdown for better formatting
                 await message.channel.send(f'```\n{table_str}\n```')
-                # Convert 'Date' column to datetime format
-                df['Date'] = pd.to_datetime(df['Date'])
 
-                # Monthly spending summary
                 df['Month'] = df['Date'].dt.to_period('M')
-
-                columns_to_save = ['Date','Amount','Category','Merchant']
-                df_filtered = df[columns_to_save]
+                df_filtered = df[cols]
                 file_path = 'filtered_data.csv'
                 df_filtered.to_csv(df_file_path, index=False)
 
@@ -120,12 +100,17 @@ async def on_message(message):
                 markdown_content = "Summary Report:\n"
                 markdown_content += f"Total Spending: {total_spending}\n\n"
 
-                for i, df in enumerate(dfs, start=1):
-                    markdown_table = df.to_markdown()
+                for i, df0 in enumerate(dfs, start=1):
+                    markdown_table = df0.to_markdown(index=False)
                     markdown_content += markdown_table
                     markdown_content += "\n\n"  # Add some spacing between tables
+
+                md_report = generate_bank_statement_report(df)
+                await message.channel.send('Creating your Bank Statement Analytics Report...\n')
+                await message.channel.send(md_report)
+                await message.channel.send("-# To run queries on the data, type /ask followed by your question. E.g., '/ask What is my biggest purchase?'")
+    
                 
-                await message.channel.send(f'```\n{markdown_content}\n```')
     if message.content.startswith('/ask'):
         messages = [
             "Hang tight, we're working on it!",

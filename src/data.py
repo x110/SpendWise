@@ -65,9 +65,9 @@ def extract_table_from_pdf(pdf_path):
 
 
 # Function to process the DataFrame and parse transactions
-def process_transactions(data_path):
+def parse_transactions(df):
     # Load the data
-    df = pd.read_csv(data_path)
+    
     df = df.rename(columns={'Date':'Date0'})
     
     # Drop rows where all elements are NaN
@@ -154,7 +154,20 @@ def process_transactions(data_path):
     
     # Combine parsed information with the original DataFrame
     df_final = pd.concat([df, df_parsed], axis=1)
-    
+    df_final['Date'] = pd.to_datetime(df_final['Date'])
+    df_final['Amount'] = pd.to_numeric(df_final['Amount'])
+    df_final.fillna({
+        'Debits': 0,
+        'Credits': 0,
+        'Balance': 0,
+        'Amount': 0
+        }, inplace=True)
+
+        #df_final = df_final.dropna(how='all')
+        #df_final = df_final.dropna(subset=['Merchant'])
+    cols = ['Merchant','Location','Date', 'Amount']
+    df_final = df_final.filter(cols)
+
     return df_final
 
 # Example usage:
@@ -360,11 +373,10 @@ def execute_query_and_display(user_request, df):
     if "SELECT" in sql_query:  # simple check if the response seems like a SQL query
         try:
             result = sqldf(sql_query.lower(), locals())
-            result_text = format_table_as_text(result)
+            result_text = result.to_markdown(index=False)#format_table_as_text(result)
             markdown_content = f"### Here’s what we found:\n```\n{result_text}\n```\n### We ran the following SQL query:\n```sql\n{sql_query}\n```\n\n"
             return markdown_content
         except Exception as e:
             print(f"Error executing query: {e}")
     else:
         print(sql_query)
-
