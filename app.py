@@ -9,12 +9,21 @@ from src.data import extract_table_from_pdf, parse_transactions, classify_compan
 from src.report import generate_bank_statement_report
 from dotenv import load_dotenv
 import random
+from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
 
 app = FastAPI()
 
-VALID_TOKEN = os.getenv("SPENDWISE_TOKEN", "your_secret_token")  # Retrieve token from environment variables
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Replace with your allowed origins
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],  # Specify allowed methods
+    allow_headers=["X-Custom-Header", "Content-Type"],  # Specify allowed headers
+)
+VALID_TOKEN = os.getenv("SPENDWISE_TOKEN")  # Retrieve token from environment variables
 
 df_file_path = 'filtered_data.csv'
 
