@@ -365,7 +365,7 @@ def format_table_as_text(df):
     return f"{header}\n{separator}\n{rows}"
 
 
-def execute_query_and_display(user_request, df):
+def execute_query_and_display(user_request, df,markdown=True):
     # Get the SQL query from the AI71 API
     user_request = 'Write a SQL query which answers' + user_request
     sql_query = get_sql_query(user_request)
@@ -373,9 +373,12 @@ def execute_query_and_display(user_request, df):
     if "SELECT" in sql_query:  # simple check if the response seems like a SQL query
         try:
             result = sqldf(sql_query.lower(), locals())
-            result_text = result.to_markdown(index=False)#format_table_as_text(result)
-            markdown_content = f"### Here’s what we found:\n```\n{result_text}\n```\n### We ran the following SQL query:\n```sql\n{sql_query}\n```\n\n"
-            return markdown_content
+            if markdown:
+                result_text = result.to_markdown(index=False)#format_table_as_text(result)
+                markdown_content = f"### Here’s what we found:\n```\n{result_text}\n```\n### We ran the following SQL query:\n```sql\n{sql_query}\n```\n\n"
+                return markdown_content
+            else:
+                return result.to_dict(orient='records')
         except Exception as e:
             print(f"Error executing query: {e}")
     else:

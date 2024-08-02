@@ -1,8 +1,7 @@
 import os
-import pdfplumber
 import pandas as pd
 import json
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, Header, Depends
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import List
@@ -15,18 +14,25 @@ load_dotenv()
 
 app = FastAPI()
 
+VALID_TOKEN = os.getenv("SPENDWISE_TOKEN", "your_secret_token")  # Retrieve token from environment variables
+
 df_file_path = 'filtered_data.csv'
 
 
 class QueryRequest(BaseModel):
     question: str
 
+
+def verify_token(x_token: str = Header(...)) -> None:
+    if x_token != VALID_TOKEN:
+        raise HTTPException(status_code=401, detail="Invalid or missing token")
+    
 @app.get("/")
 def greet_json():
     return {"Spendwise APIs"}
 
 @app.post("/upload_pdf/")
-async def upload_pdf(file: UploadFile = File(...)):
+async def upload_pdf(file: UploadFile = File(...), x_token: str = Depends(verify_token)):
     if not file.filename.endswith('.pdf'):
         raise HTTPException(status_code=400, detail="Invalid file type. Only PDF files are accepted.")
     
@@ -39,7 +45,7 @@ async def upload_pdf(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail="Failed to extract tables from the PDF.")
 
     df = pd.read_csv(csv_path)
-    table_str = df[['Description']].head().to_markdown(index=False)
+    sample_table = df.iloc[:5]['Description'].tolist()
     
     df = parse_transactions(df)
     merchants = df.Merchant.drop_duplicates()
@@ -66,12 +72,12 @@ async def upload_pdf(file: UploadFile = File(...)):
     df_filtered = df[cols]
     df_filtered.to_csv(df_file_path, index=False)
 
-    md_report = generate_bank_statement_report(df)
-    return JSONResponse(content={"message": "PDF processed successfully.", "sample_table": table_str, "report": md_report})
+    report_content = generate_bank_statement_report(df,markdown=False)
+    return JSONResponse(content={"message": "PDF processed successfully.", "sample_table": sample_table, "report_content": report_content})
 
 
 @app.post("/ask/")
-async def ask_question(request: QueryRequest):
+async def ask_question(request: QueryRequest, x_token: str = Depends(verify_token)):
     messages = [
         "Hang tight, we're working on it!",
         "Hold up, we’re fetching the info you need!",
@@ -87,8 +93,8 @@ async def ask_question(request: QueryRequest):
     if os.path.exists(df_file_path):
         try:
             df = pd.read_csv(df_file_path)
-            markdown_content = execute_query_and_display(request.question, df)
-            return JSONResponse(content={"message": response_message, "response": markdown_content})
+            results = execute_query_and_display(request.question, df,markdown=False)
+            return JSONResponse(content={"message": response_message, "response": results})
         except Exception as e:
             raise HTTPException(status_code=500, detail="Error processing the query")
     else:
