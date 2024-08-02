@@ -78,35 +78,11 @@ async def on_message(message):
                 table_str = df.filter(cols).head().to_markdown(index=False)  # Use markdown for better formatting
                 await message.channel.send(f'```\n{table_str}\n```')
 
-                df['Month'] = df['Date'].dt.to_period('M')
                 df_filtered = df[cols]
-                file_path = 'filtered_data.csv'
                 df_filtered.to_csv(df_file_path, index=False)
 
-                monthly_summary = df.groupby('Month')['Amount'].sum().reset_index()
-
-                # Top spenders by merchant
-                merchant_summary = df.groupby('Merchant')['Amount'].sum().reset_index().sort_values(by='Amount', ascending=False)
-
-                # Category spending distribution
-                category_summary = df.groupby('Category')['Amount'].sum().reset_index()
-
-                # Calculate overall total spending
-                total_spending = df['Amount'].sum()
-
-                # Summary report
-                dfs = [monthly_summary,merchant_summary, category_summary]
-
-                markdown_content = "Summary Report:\n"
-                markdown_content += f"Total Spending: {total_spending}\n\n"
-
-                for i, df0 in enumerate(dfs, start=1):
-                    markdown_table = df0.to_markdown(index=False)
-                    markdown_content += markdown_table
-                    markdown_content += "\n\n"  # Add some spacing between tables
-
-                md_report = generate_bank_statement_report(df)
                 await message.channel.send('Creating your Bank Statement Analytics Report...\n')
+                md_report = generate_bank_statement_report(df)
                 await message.channel.send(md_report)
                 await message.channel.send("-# To run queries on the data, type /ask followed by your question. E.g., '/ask What is my biggest purchase?'")
     
@@ -130,7 +106,7 @@ async def on_message(message):
                 markdown_content = execute_query_and_display(message.content, df)
                 await message.channel.send(markdown_content)
             except Exception as e:
-                await message.channel.send(f'Error processing the file: {e}')
+                await message.channel.send(f'Error processing the query')
         else:
             await message.channel.send('File not found. Please ensure the file exists and try again.')
         

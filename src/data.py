@@ -154,7 +154,7 @@ def parse_transactions(df):
     
     # Combine parsed information with the original DataFrame
     df_final = pd.concat([df, df_parsed], axis=1)
-    df_final['Date'] = pd.to_datetime(df_final['Date'])
+    df_final['Date'] = pd.to_datetime(df_final['Date'],dayfirst=True)
     df_final['Amount'] = pd.to_numeric(df_final['Amount'])
     df_final.fillna({
         'Debits': 0,
@@ -163,8 +163,8 @@ def parse_transactions(df):
         'Amount': 0
         }, inplace=True)
 
-        #df_final = df_final.dropna(how='all')
-        #df_final = df_final.dropna(subset=['Merchant'])
+    df_final = df_final.dropna(how='all')
+    df_final = df_final.dropna(subset=['Merchant'])
     cols = ['Merchant','Location','Date', 'Amount']
     df_final = df_final.filter(cols)
 
