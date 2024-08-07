@@ -13,6 +13,7 @@ SpendWise is an AI-powered chatbot designed to categorize individual spending fr
 
 - **Mobile App**: Users can download the SpendWise mobile app to interact with the chatbot. [Download APK](#)
 - **Gradio Interface**: Users can also access SpendWise via a Gradio interface. [Gradio UI](https://saaf.github.io/spendwise)
+The Gradio UI backend is available in the repository [github.com/UsmanSafni/SpendWise](https://github.com/UsmanSafni/SpendWise).
 
 ## Objectives
 - **Automate Transaction Categorization**: Utilize an LLM to accurately categorize each transaction from bank statements into predefined spending categories (e.g., groceries, entertainment, utilities).
@@ -30,9 +31,6 @@ A user asks SpendWise, "How much did I spend on groceries last month?" The chatb
 ## Interfaces
 - **Mobile App**: Users can download the SpendWise mobile app to interact with the chatbot. [Download APK](#)
 - **Gradio Interface**: Users can also access SpendWise via a Gradio interface. [Gradio UI](https://saaf.github.io/spendwise)
-
-The Gradio UI backend is available in the repository [github.com/UsmanSafni/SpendWise](https://github.com/UsmanSafni/SpendWise).
-
 
 ## Milestone: SpendWise Bot Initial Prototype
 
