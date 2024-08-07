@@ -2,6 +2,12 @@ fastapi
 uvicorn[standard]
 discord.py
 pdfplumber
-pandas
-requests
 tabulate
+python-multipart
+requests 
+pandas 
+python-dotenv 
+pandasql
+langchain 
+langchain-community 
+langchain-openai

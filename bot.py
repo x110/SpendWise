@@ -10,7 +10,7 @@ import random
 load_dotenv()
 
 # Replace 'YOUR_BOT_TOKEN' with your actual bot token
-TOKEN = os.getenv('DISCORD_BOT_TOKEN_DEV')
+TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 
 # Create a new instance of the bot
 intents = discord.Intents.default()
@@ -30,7 +30,7 @@ async def on_message(message):
         for attachment in message.attachments:
             if attachment.filename.endswith('.pdf'):
                 await message.channel.send('"PDF received! Extracting content now...')
-                pdf_path = f'/tmp/{attachment.filename}'
+                pdf_path = "./data/bank_statement.pdf"
                 await attachment.save(pdf_path)
 
                 csv_path = extract_table_from_pdf(pdf_path)

@@ -17,6 +17,6 @@ COPY --chown=user . /app
 # Use a script to run the appropriate command
 COPY --chown=user start.sh /app/start.sh
 # Set the PYTHONPATH environment variable
-ENV PYTHONPATH=/app/src
+ENV PYTHONPATH=/app/apps
 RUN chmod +x /app/start.sh
 CMD ["/app/start.sh"]
